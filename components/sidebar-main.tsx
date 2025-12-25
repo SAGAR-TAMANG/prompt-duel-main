@@ -10,7 +10,6 @@ import {
   IconFileWord,
   IconFolder,
   IconHelp,
-  IconInnerShadowTop,
   IconListDetails,
   IconReport,
   IconSearch,
@@ -30,6 +29,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { SwordIcon } from "@phosphor-icons/react/dist/ssr"
 const data = {
   user: {
     name: "shadcn",
@@ -157,8 +157,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <a href="#">
-                <IconInnerShadowTop className="size-5!" />
-                <span className="text-base font-semibold">Prompt Duel</span>
+                <SwordIcon className="size-5!" />
+                <span className="text-base font-semibold">PromptDuel</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -37,3 +37,18 @@ export async function deleteDuelTurn(id: string) {
   if (error) throw error
   return true
 }
+
+export async function voteDuelTurn(turnId: string, type: 'likes_a' | 'dislikes_a' | 'likes_b' | 'dislikes_b') {
+  const supabase = createClient()
+  
+  const { error } = await supabase.rpc('increment_vote', { 
+    turn_id: turnId, 
+    target_column: type 
+  })
+
+  if (error) {
+    console.error("Vote failed:", error)
+    throw error
+  }
+  return true
+}

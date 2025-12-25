@@ -1,22 +1,17 @@
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { ArenaEditor } from "@/components/arena/arena-editor"
+import { QueryProvider } from "@/components/query-providers"
+import { ArenaVoter } from "@/components/arena-voter"
 
 type Props = {
   params: Promise<{ id: string }>
 }
 
-export default async function DashboardArenaPage({ params }: Props) {
-  // 1. Unwrap the params (Next.js 15 requirement)
+export default async function PublicArenaPage({ params }: Props) {
   const { id } = await params
-
   const supabase = await createClient()
 
-  // 2. Check Auth
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect("/")
-
-  // 3. Fetch Duel Data
+  // 1. Fetch Duel (Public - No Auth Check needed for *viewing*)
   const { data: duel, error } = await supabase
     .from("duels")
     .select("*")
@@ -27,20 +22,10 @@ export default async function DashboardArenaPage({ params }: Props) {
     notFound()
   }
 
-  // 4. Strict Ownership Check
-  // Only the creator can see the "Dashboard" version
-  if (duel.user_id !== user.id) {
-    return (
-      <div className="flex h-[50vh] flex-col items-center justify-center gap-2">
-        <h2 className="text-xl font-bold text-destructive">Access Denied</h2>
-        <p className="text-muted-foreground">You do not have permission to edit this duel.</p>
-      </div>
-    )
-  }
-
+  // 2. Wrap in Providers because we use useQuery in the child
   return (
-    <div className="mx-auto max-w-5xl py-6">
-      <ArenaEditor duel={duel} />
-    </div>
+    <QueryProvider>
+      <ArenaVoter duel={duel} />
+    </QueryProvider>
   )
 }

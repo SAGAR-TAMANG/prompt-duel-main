@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "name": "Customer Support v2.1 vs v2.2",
+    "status": "Active",
+    "total_votes": 156,
+    "win_rate": {
+      "winner": "B",
+      "percentage": 62,
+      "delta": 24
+    },
+    "models": "GPT-4o vs GPT-4o",
+    "created_at": "2023-12-20T10:30:00Z",
+    "public_link": "https://promptduel.com/arena/cs-v2"
+  },
+  {
+    "id": 2,
+    "name": "Creative Writer: Claude vs GPT",
+    "status": "Concluded",
+    "total_votes": 89,
+    "win_rate": {
+      "winner": "A",
+      "percentage": 54,
+      "delta": 8
+    },
+    "models": "Claude 3.5 Sonnet vs GPT-4o",
+    "created_at": "2023-12-18T14:20:00Z",
+    "public_link": "https://promptduel.com/arena/creative-write"
+  },
+  {
+    "id": 3,
+    "name": "SQL Generator Optimization",
+    "status": "Active",
+    "total_votes": 42,
+    "win_rate": {
+      "winner": "B",
+      "percentage": 78,
+      "delta": 56
+    },
+    "models": "Llama 3.1 70b vs GPT-4o mini",
+    "created_at": "2023-12-24T09:00:00Z",
+    "public_link": "https://promptduel.com/arena/sql-gen"
+  },
+  {
+    "id": 4,
+    "name": "Twitter Thread Viral Hook",
+    "status": "Draft",
+    "total_votes": 0,
+    "win_rate": {
+      "winner": null,
+      "percentage": 0,
+      "delta": 0
+    },
+    "models": "GPT-4o vs Claude 3.5 Sonnet",
+    "created_at": "2023-12-25T16:45:00Z",
+    "public_link": "https://promptduel.com/arena/tw-hook"
+  },
+  {
+    "id": 5,
+    "name": "Code Refactor: Descriptive vs Concise",
+    "status": "Active",
+    "total_votes": 210,
+    "win_rate": {
+      "winner": "A",
+      "percentage": 51,
+      "delta": 2
+    },
+    "models": "Claude 3.5 Sonnet vs Claude 3.5 Sonnet",
+    "created_at": "2023-12-15T11:15:00Z",
+    "public_link": "https://promptduel.com/arena/code-ref"
+  }
+]

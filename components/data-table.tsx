@@ -112,6 +112,7 @@ import {
 } from "@/components/ui/tabs"
 import useGetDuels from "@/hooks/use-get-duels"
 import { CreateDuelDialog } from "./create-duel-dialog"
+import { useRouter } from "next/navigation"
 
 // --- 1. NEW TYPE DEFINITION (Replaces Zod Schema) ---
 // This interface defines the shape of the data used in the UI
@@ -611,6 +612,8 @@ const chartConfig = {
 // --- 5. UPDATED DRAWER ---
 function TableCellViewer({ item }: { item: DuelRow }) {
   const isMobile = useIsMobile()
+  const router = useRouter();
+  
   return (
     <Drawer direction={isMobile ? "bottom" : "right"}>
       <DrawerTrigger asChild>
@@ -698,7 +701,7 @@ function TableCellViewer({ item }: { item: DuelRow }) {
         </div>
         
         <DrawerFooter>
-          <Button onClick={() => toast.success("Changes saved!")}>Save Changes</Button>
+          <Button onClick={() => router.push(`/dashboard/arena/${item.id}`)}>Edit</Button>
           <Button variant="secondary" onClick={() => window.open(item.public_link, '_blank')}>
              <IconExternalLink className="mr-2 size-4" />
              View Public Page

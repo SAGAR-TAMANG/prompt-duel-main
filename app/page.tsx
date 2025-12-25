@@ -1,13 +1,12 @@
 "use client";
 
 import { createBrowserClient } from "@supabase/ssr";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 // Import Phosphor Icons
-import { Sword, ArrowRight, GithubLogo, GoogleLogo, CircleNotch } from "@phosphor-icons/react";
+import { ArrowRightIcon, CircleNotchIcon, GithubLogoIcon, GoogleLogoIcon, SwordIcon } from "@phosphor-icons/react/dist/ssr";
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,7 +48,7 @@ export default function Home() {
       <main className="flex min-h-screen w-full max-w-4xl flex-col items-center justify-center py-20 px-8 sm:items-start">
         
         <div className="mb-8 flex items-center gap-2 text-black dark:text-white">
-          <Sword size={32} weight="duotone" className="text-zinc-600" />
+          <SwordIcon size={32} weight="duotone" className="text-zinc-600" />
           <h2 className="text-2xl font-bold tracking-tighter">
             PromptDuel
           </h2>
@@ -76,7 +75,7 @@ export default function Home() {
             <Button asChild size="lg" className="w-full md:w-auto px-8 gap-2">
               <Link href="/dashboard">
                 Go to Dashboard
-                <ArrowRight size={18} weight="bold" />
+                <ArrowRightIcon size={18} weight="bold" />
               </Link>
             </Button>
           ) : (
@@ -88,9 +87,9 @@ export default function Home() {
               onClick={signInWithGoogle}
             >
               {loading ? (
-                <CircleNotch size={20} className="animate-spin" />
+                <CircleNotchIcon size={20} className="animate-spin" />
               ) : (
-                <GoogleLogo size={20} weight="bold" />
+                <GoogleLogoIcon size={20} weight="bold" />
               )}
               {loading ? "Signing in..." : "Get Started with Google"}
             </Button>
@@ -102,7 +101,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <GithubLogo size={20} weight="bold" />
+              <GithubLogoIcon size={20} weight="bold" />
               Star on GitHub
             </a>
           </Button>

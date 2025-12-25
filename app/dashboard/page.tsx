@@ -3,8 +3,6 @@ import { ComponentExample } from "@/components/component-example";
 import { DataTable } from "@/components/data-table";
 import { ChartAreaInteractive } from "@/components/chat-area-interactive";
 
-import data from "./data.json"
-
 export const metadata: Metadata = {
   title: "My Duels | Dashboard", 
 };
@@ -14,7 +12,7 @@ export default function Page() {
     <>
       {/* <ComponentExample /> */}
       {/* <ChartAreaInteractive /> */}
-      <DataTable data={data} />
+      <DataTable />
     </>
   
 );

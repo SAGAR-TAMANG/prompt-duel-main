@@ -31,11 +31,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import {
   IconChevronDown,
-  IconChevronLeft,
-  IconChevronRight,
-  IconChevronsLeft,
-  IconChevronsRight,
-  IconCircleCheckFilled,
   IconCopy,
   IconDotsVertical,
   IconExternalLink,
@@ -44,6 +39,7 @@ import {
   IconLoader,
   IconPlus,
   IconTrendingUp,
+  IconCircleCheckFilled,
 } from "@tabler/icons-react"
 import {
   flexRender,
@@ -56,13 +52,12 @@ import {
   useReactTable,
   type ColumnDef,
   type ColumnFiltersState,
-  type Row,
   type SortingState,
   type VisibilityState,
+  type Row,
 } from "@tanstack/react-table"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 import { toast } from "sonner"
-import { z } from "zod"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -117,27 +112,26 @@ import {
 } from "@/components/ui/tabs"
 import useGetDuels from "@/hooks/use-get-duels"
 
-// --- 1. NEW SCHEMA DEFINITION ---
-export const schema = z.object({
-  id: z.number(),
-  name: z.string(),
-  status: z.string(), // "Active", "Draft", "Concluded"
-  total_votes: z.number(),
-  win_rate: z.object({
-    winner: z.string().nullable(), // "A" or "B"
-    percentage: z.number(),
-    delta: z.number(),
-  }),
-  models: z.string(), // "GPT-4o vs Claude 3.5"
-  created_at: z.string(),
-  public_link: z.string(),
-})
+// --- 1. NEW TYPE DEFINITION (Replaces Zod Schema) ---
+// This interface defines the shape of the data used in the UI
+export interface DuelRow {
+  id: string
+  name: string
+  status: string
+  total_votes: number
+  win_rate: {
+    winner: string | null
+    percentage: number
+    delta: number
+  }
+  models: string
+  created_at: string
+  public_link: string
+}
 
 // Drag Handle Component
-function DragHandle({ id }: { id: number }) {
-  const { attributes, listeners } = useSortable({
-    id,
-  })
+function DragHandle({ id }: { id: string }) {
+  const { attributes, listeners } = useSortable({ id })
   return (
     <Button
       {...attributes}
@@ -152,8 +146,8 @@ function DragHandle({ id }: { id: number }) {
   )
 }
 
-// --- 2. UPDATED COLUMNS ---
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
+// --- 2. COLUMNS DEFINITION ---
+const columns: ColumnDef<DuelRow>[] = [
   {
     id: "drag",
     header: () => null,
@@ -225,8 +219,6 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Win Rate (Δ)",
     cell: ({ row }) => {
       const { winner, percentage } = row.original.win_rate
-      // Calculate width for Prompt A (Blue) vs Prompt B (Orange)
-      // If winner is A, percentage is A's share. If winner is B, percentage is B's share.
       const winPct = percentage || 50
       const leftWidth = winner === "A" ? winPct : (100 - winPct)
       
@@ -342,7 +334,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   },
 ]
 
-function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
+function DraggableRow({ row }: { row: Row<DuelRow> }) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: row.original.id,
   })
@@ -366,21 +358,17 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
   )
 }
 
-// --- 3. DATA TABLE COMPONENT (UNCHANGED LOGIC, JUST PASSING NEW SCHEMA) ---
-export function DataTable({
-  data: initialData,
-}: {
-  data: z.infer<typeof schema>[]
-}) {
+// --- 3. DATA TABLE COMPONENT ---
+export function DataTable() {
   const [rowSelection, setRowSelection] = React.useState({})
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
   })
+  
   const sortableId = React.useId()
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
@@ -388,29 +376,28 @@ export function DataTable({
     useSensor(KeyboardSensor, {})
   )
 
-  const {data: fetchedData, isLoading, isError} = useGetDuels();
-  const [data, setData] = React.useState<z.infer<typeof schema>[]>([]);
+  // FETCH DATA
+  const { data: fetchedData, isLoading, isError } = useGetDuels();
+  const [data, setData] = React.useState<DuelRow[]>([]);
 
+  // TRANSFORM DATA
   React.useEffect(() => {
     if (fetchedData) {
-      // Map the raw DB data (Duel) to your Table Schema
-      const formattedData = fetchedData.map((duel) => ({
-        id: Number(duel.id),
+      // @ts-ignore - Assuming fetchedData matches the shape of DB response we need
+      const formattedData: DuelRow[] = fetchedData.map((duel: any) => ({
+        id: duel.id,
         name: duel.name,
-        // Capitalize status if needed, or pass as is
         status: duel.status.charAt(0).toUpperCase() + duel.status.slice(1), 
         
-        // --- Populate the missing UI fields with placeholders or calculations ---
-        total_votes: 0, // You will eventually need a separate query to count these
+        // Mocking calculated fields for now
+        total_votes: 0,
         win_rate: {
           winner: null,
           percentage: 0,
           delta: 0,
         },
-        // Combine the contender names
         models: `${duel.contender_a_name} vs ${duel.contender_b_name}`,
         created_at: duel.created_at,
-        // Generate the link based on the ID
         public_link: typeof window !== 'undefined' 
           ? `${window.location.origin}/arena/${duel.id}` 
           : `/arena/${duel.id}`,
@@ -424,6 +411,7 @@ export function DataTable({
     () => data?.map(({ id }) => id) || [],
     [data]
   )
+
   const table = useReactTable({
     data,
     columns,
@@ -434,7 +422,7 @@ export function DataTable({
       columnFilters,
       pagination,
     },
-    getRowId: (row) => row.id.toString(),
+    getRowId: (row) => row.id,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
@@ -460,13 +448,31 @@ export function DataTable({
     }
   }
 
+  // --- LOADING STATES ---
+  if (isLoading) {
+    return (
+      <div className="flex h-64 w-full items-center justify-center">
+        <IconLoader className="animate-spin text-muted-foreground size-8" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+       <div className="flex h-64 w-full flex-col items-center justify-center gap-2 text-destructive">
+          <p>Failed to load duels.</p>
+          <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+       </div>
+    )
+  }
+
   return (
     <Tabs defaultValue="all" className="w-full flex-col justify-start gap-6">
       <div className="flex items-center justify-between px-4 lg:px-6">
         <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
           <TabsTrigger value="all">All Duels</TabsTrigger>
           <TabsTrigger value="active">
-            Active <Badge variant="secondary">3</Badge>
+            Active <Badge variant="secondary">{data.filter(d => d.status === 'Active').length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="drafts">Drafts</TabsTrigger>
         </TabsList>
@@ -554,9 +560,8 @@ export function DataTable({
             </Table>
           </DndContext>
         </div>
-        {/* Pagination controls (kept same as before) */}
+        
         <div className="flex items-center justify-between px-4 pb-4">
-           {/* ... (Kept the pagination logic for brevity) ... */}
            <div className="text-muted-foreground text-sm">
              {table.getFilteredRowModel().rows.length} row(s)
            </div>
@@ -600,8 +605,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-// --- 5. UPDATED DRAWER (TABLE CELL VIEWER) ---
-function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
+// --- 5. UPDATED DRAWER ---
+function TableCellViewer({ item }: { item: DuelRow }) {
   const isMobile = useIsMobile()
   return (
     <Drawer direction={isMobile ? "bottom" : "right"}>
@@ -619,7 +624,6 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
         </DrawerHeader>
         
         <div className="flex flex-col gap-6 overflow-y-auto px-4 text-sm pb-10">
-          {/* VOTE VELOCITY CHART */}
           <div className="rounded-lg border p-3">
              <div className="flex items-center gap-2 mb-2">
                 <IconTrendingUp className="size-4 text-green-500" />

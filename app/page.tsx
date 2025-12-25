@@ -2,31 +2,28 @@
 
 import { createBrowserClient } from "@supabase/ssr";
 import Image from "next/image";
-import Link from "next/link"; // Import Link
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 
-const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function Home() {
   const [loading, setLoading] = useState<boolean | undefined>(true);
   const [user, setUser] = useState<User | null>(null);
 
-  // Check user when component mounts
   useEffect(() => {
     async function loadUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
+      const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       setLoading(false);
     }
-
     loadUser();
   }, []);
 
-  
   async function signInWithGoogle() {
     try {
       setLoading(true);
@@ -34,77 +31,73 @@ export default function Home() {
         provider: "google",
         options: {
           redirectTo: `${location.origin}/auth/callback`,
-          scopes:
-            "openid email profile",
+          scopes: "openid email profile",
           queryParams: { access_type: "offline", prompt: "consent" },
         },
       });
-      if (error) console.error("OAuth start error:", error);
+      if (error) console.error("OAuth error:", error);
     } finally {
       setLoading(false);
     }
   }
-  
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="invert"
-          src="/twospoon-logo.svg"
-          alt="Next.js logo"
-          width={180}
-          height={20}
-          priority
-        />
+      <main className="flex min-h-screen w-full max-w-4xl flex-col items-center justify-center py-20 px-8 sm:items-start">
+        
+        {/* Replace with your PromptDuel Logo */}
+        <div className="mb-8 flex items-center gap-2">
+          <span className="text-4xl">⚔️</span>
+          <h2 className="text-2xl font-bold tracking-tighter text-black dark:text-white">
+            PromptDuel
+          </h2>
+        </div>
+
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            Master Your Meta Ads Performance with the River AI Agent
+          <h1 className="max-w-2xl text-4xl font-bold leading-[1.1] tracking-tight text-black dark:text-zinc-50 sm:text-6xl">
+            Stop guessing which prompt is better. 
+            <span className="text-zinc-600 dark:text-zinc-400"> Duel them.</span>
           </h1>
+          
           <p className="max-w-xl text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            { user && `Hello ${user.email}. `}
-            Stop digging through Business Manager. Connect to the{" "}
-            <span className="font-medium text-zinc-950 dark:text-zinc-50">
-              river-mcp-server
-            </span>{" "}
-            and let our AI Agent analyze your Meta advertising data. 
-            Use natural language to audit campaigns, track ROAS, and uncover optimization opportunities instantly.
+            {user && <span className="block mb-2 font-medium text-black dark:text-white">Welcome back, {user.email?.split('@')[0]}!</span>}
+            Unbiased, side-by-side LLM testing. Collect human-in-the-loop feedback and find the prompts that actually perform.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row w-full">
-          
-          {/* LOGIC: If User exists, show Continue. If not, show Connect. */}
+
+        <div className="mt-10 flex flex-col gap-4 font-medium sm:flex-row w-full">
           {user ? (
             <Link
-              href="/chat"
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-cyan-700 px-5 text-white transition-colors hover:bg-cyan-950 md:max-w-[250px]"
+              href="/dashboard"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-zinc-600 px-8 text-white transition-all hover:bg-zinc-700 md:w-auto"
             >
-              Continue to Agent 
+              Go to Dashboard
               <span aria-hidden="true">→</span>
             </Link>
           ) : (
             <button
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:max-w-[250px]"
+              className="flex h-12 w-full items-center justify-center gap-3 rounded-lg bg-black px-8 text-white transition-all hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 md:w-auto"
               disabled={loading}
               onClick={signInWithGoogle}
             >
               <Image
                 className="dark:invert"
                 src="/google-logo.png"
-                alt="Google logo"
-                width={16}
-                height={16}
+                alt="Google"
+                width={18}
+                height={18}
               />
-              {loading ? "Connecting.." : "Connect Account"}
+              {loading ? "Signing in..." : "Get Started with Google"}
             </button>
           )}
 
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:max-w-[250px]"
-            href="https://github.com/twospoon/river-chat-mcp"
+            className="flex h-12 w-full items-center justify-center rounded-lg border border-zinc-200 bg-white px-8 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-transparent dark:hover:bg-zinc-900 md:w-auto"
+            href="https://github.com/your-username/promptduel"
             target="_blank"
             rel="noopener noreferrer"
           >
-            GitHub
+            Star on GitHub
           </a>
         </div>
       </main>

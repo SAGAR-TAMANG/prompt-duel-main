@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⚔️ PromptDuel
 
-## Getting Started
+> **"Stop guessing which prompt is better. Duel them and let the data decide."**
 
-First, run the development server:
+PromptDuel is a lightweight tool designed for AI engineers and prompt designers to evaluate LLM outputs through side-by-side "blind" testing. Instead of relying on your own bias, PromptDuel allows you to collect human-in-the-loop feedback to find the most effective prompts.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 The Problem
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+When developing AI Agents, small changes in a prompt can lead to drastically different results. It's hard to track which iteration is actually "better" without a structured way to compare them and gather external feedback.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ✨ Key Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* **Side-by-Side Comparison:** View two different prompt outputs in a clean, split-screen interface.
+* **Blind Testing:** Hide model/prompt names to get unbiased feedback from testers.
+* **Sharable Duel Links:** Generate a unique URL to send to clients or team members for voting.
+* **Persistent History:** All duels and votes are stored securely using **Supabase**.
+* **One-Click Login:** Fast, secure access via Google Auth.
 
-## Learn More
+## 🛠️ Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+* **Frontend:** Next.js / React (hosted on Vercel)
+* **Backend/Database:** [Supabase](https://supabase.com)
+* **Authentication:** Supabase Google Auth
+* **Domain:** [promptduel.feynmanpi.com](https://www.google.com/search?q=https://promptduel.feynmanpi.com)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🏗️ Getting Started
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Clone the repo:** `git clone https://github.com/yourusername/promptduel`
+2. **Install dependencies:** `npm install`
+3. **Set up Environment Variables:** Create a `.env` file with your Supabase URL and Anon Key.
+4. **Run locally:** `npm run dev`
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📈 Build in Public
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is part of my **#BuildInPublic** journey where I focus on persistence and shipping real-world tools.
+
+Follow my progress:
+
+* **X (Twitter):** [@sagar_builds](https://www.google.com/search?q=https://x.com/sagar_builds)
+* **Instagram:** [@sagar_builds](https://www.google.com/search?q=https://instagram.com/sagar_builds)
+
+---
+
+### Catchy Descriptions for Site Header/Socials:
+
+* *"Compare your prompts early, get feedback instantly."*
+* *"The 'Pepsi Challenge' for LLM Prompts."*
+* *"Unbiased feedback for your AI iterations."*
+* *"Where the best prompt wins."*

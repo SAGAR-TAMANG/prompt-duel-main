@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { UserProvider } from "@/components/user-provider";
 import { redirect } from "next/navigation";
 import SiteHeader from "@/components/site-header";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryProvider } from "@/components/query-providers";
 
 export const metadata: Metadata = {
   title: {
@@ -22,6 +24,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const supabase = await createClient()
+  
   // Get the logged-in user
   const { data: { user } } = await supabase.auth.getUser()
   const userData = user ? {
@@ -35,24 +38,26 @@ export default async function DashboardLayout({
   }
   
   return (
-    <UserProvider initialUser={user}>
-      <SidebarProvider
-        style={
-          {
-            "--sidebar-width": "calc(var(--spacing) * 72)",
-            "--header-height": "calc(var(--spacing) * 12)",
-          } as React.CSSProperties
-        }
-      >
-        <AppSidebar variant="inset" fetchedUser={userData} />
-        <SidebarInset>
-          <SiteHeader userData={userData} />
+    <QueryProvider>
+      <UserProvider initialUser={user}>
+        <SidebarProvider
+          style={
+            {
+              "--sidebar-width": "calc(var(--spacing) * 72)",
+              "--header-height": "calc(var(--spacing) * 12)",
+            } as React.CSSProperties
+          }
+        >
+          <AppSidebar variant="inset" fetchedUser={userData} />
+          <SidebarInset>
+            <SiteHeader userData={userData} />
 
-          <main className="p-4 pt-4">
-            {children}
-          </main>
-        </SidebarInset>
-      </SidebarProvider>
-    </UserProvider>
+            <main className="p-4 pt-4">
+              {children}
+            </main>
+          </SidebarInset>
+        </SidebarProvider>
+      </UserProvider>
+    </QueryProvider>
   );
 }

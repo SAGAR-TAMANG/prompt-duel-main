@@ -115,6 +115,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+import useGetDuels from "@/hooks/use-get-duels"
 
 // --- 1. NEW SCHEMA DEFINITION ---
 export const schema = z.object({
@@ -371,7 +372,6 @@ export function DataTable({
 }: {
   data: z.infer<typeof schema>[]
 }) {
-  const [data, setData] = React.useState(() => initialData)
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
@@ -387,6 +387,39 @@ export function DataTable({
     useSensor(TouchSensor, {}),
     useSensor(KeyboardSensor, {})
   )
+
+  const {data: fetchedData, isLoading, isError} = useGetDuels();
+  const [data, setData] = React.useState<z.infer<typeof schema>[]>([]);
+
+  React.useEffect(() => {
+    if (fetchedData) {
+      // Map the raw DB data (Duel) to your Table Schema
+      const formattedData = fetchedData.map((duel) => ({
+        id: Number(duel.id),
+        name: duel.name,
+        // Capitalize status if needed, or pass as is
+        status: duel.status.charAt(0).toUpperCase() + duel.status.slice(1), 
+        
+        // --- Populate the missing UI fields with placeholders or calculations ---
+        total_votes: 0, // You will eventually need a separate query to count these
+        win_rate: {
+          winner: null,
+          percentage: 0,
+          delta: 0,
+        },
+        // Combine the contender names
+        models: `${duel.contender_a_name} vs ${duel.contender_b_name}`,
+        created_at: duel.created_at,
+        // Generate the link based on the ID
+        public_link: typeof window !== 'undefined' 
+          ? `${window.location.origin}/arena/${duel.id}` 
+          : `/arena/${duel.id}`,
+      }));
+
+      setData(formattedData);
+    }
+  }, [fetchedData]);
+
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => data?.map(({ id }) => id) || [],
     [data]

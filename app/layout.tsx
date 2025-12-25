@@ -27,19 +27,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <SidebarProvider>
-      <html lang="en" className={inter.variable}>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <AppSidebar variant="inset" />
+    <html lang="en" className={inter.variable}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+      <SidebarProvider
+        style={
+          {
+            "--sidebar-width": "calc(var(--spacing) * 72)",
+            "--header-height": "calc(var(--spacing) * 12)",
+          } as React.CSSProperties
+        }
+      >
+        <AppSidebar variant="inset" />
 
-          <SidebarInset>
-            <SidebarTrigger />
-            {children}
-          </SidebarInset>
-        </body>
-      </html>
-    </SidebarProvider>
+        <SidebarInset>
+          <SidebarTrigger />
+          {children}
+        </SidebarInset>
+        </SidebarProvider>
+      </body>
+    </html>
   );
 }

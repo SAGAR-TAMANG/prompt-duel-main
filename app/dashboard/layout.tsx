@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { UserProvider } from "@/components/user-provider";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: {
@@ -28,6 +29,10 @@ export default async function DashboardLayout({
     avatar: user.user_metadata.avatar_url ?? "",
   } : null
 
+  if (!user) {
+    redirect("/") // Fallback redirect
+  }
+  
   return (
     <UserProvider initialUser={user}>
       <SidebarProvider

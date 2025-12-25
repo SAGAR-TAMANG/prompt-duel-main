@@ -111,6 +111,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import useGetDuels from "@/hooks/use-get-duels"
+import { CreateDuelDialog } from "./create-duel-dialog"
 
 // --- 1. NEW TYPE DEFINITION (Replaces Zod Schema) ---
 // This interface defines the shape of the data used in the UI
@@ -509,10 +510,12 @@ export function DataTable() {
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" size="sm">
-            <IconPlus />
-            <span className="hidden lg:inline">New Duel</span>
-          </Button>
+          <CreateDuelDialog>
+            <Button variant="outline" size="sm">
+              <IconPlus />
+              <span className="hidden lg:inline">New Duel</span>
+            </Button>
+          </CreateDuelDialog>
         </div>
       </div>
       

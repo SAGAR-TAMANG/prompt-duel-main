@@ -2,20 +2,57 @@
 
 import * as React from "react"
 import Link from "next/link"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { IconLoader, IconPlayerPlay, IconTrash, IconUser, IconRobot, IconArrowLeft } from "@tabler/icons-react"
+import { 
+  IconLoader, 
+  IconPlayerPlay, 
+  IconTrash, 
+  IconUser, 
+  IconCpu, 
+  IconArrowLeft, 
+  IconPlus
+} from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Duel } from "@/types/duels"
 import { createDuelTurn, deleteDuelTurn, getDuelTurns } from "@/lib/turns"
-
+import { 
+  Drawer, 
+  DrawerContent, 
+  DrawerHeader, 
+  DrawerTitle, 
+  DrawerTrigger,
+  DrawerFooter
+} from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
+
+// --- Markdown Component (Static) ---
+const MarkdownText = ({ content }: { content: string }) => {
+  return (
+    <div className="prose prose-neutral dark:prose-invert prose-sm max-w-none break-words leading-relaxed">
+      <ReactMarkdown 
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code({node, inline, className, children, ...props}: any) {
+            return !inline ? (
+              <div className="relative my-4 rounded-md bg-muted/50 p-4 font-mono text-xs">
+                <code {...props} className="bg-transparent p-0">{children}</code>
+              </div>
+            ) : (
+              <code {...props} className="rounded bg-muted px-1 py-0.5 font-mono text-sm font-semibold">{children}</code>
+            )
+          }
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  )
+}
 
 interface ArenaEditorProps {
   duel: Duel
@@ -29,6 +66,12 @@ export function ArenaEditor({ duel }: ArenaEditorProps) {
   const [userInput, setUserInput] = React.useState("")
   const [responseA, setResponseA] = React.useState("")
   const [responseB, setResponseB] = React.useState("")
+  const [open, setOpen] = React.useState(false) // Drawer state
+  
+  // --- Simulation State ---
+  // We store the "visible" text here. When not streaming, this matches the DB data.
+  const [streamedContent, setStreamedContent] = React.useState<Record<string, { a: string, b: string }>>({})
+  const [isStreaming, setIsStreaming] = React.useState(false)
 
   // --- Data Fetching ---
   const { data: turns = [], isLoading } = useQuery({
@@ -36,16 +79,73 @@ export function ArenaEditor({ duel }: ArenaEditorProps) {
     queryFn: () => getDuelTurns(duel.id),
   })
 
+  // Initialize streamedContent with existing data when it loads
+  React.useEffect(() => {
+    if (turns.length > 0 && !isStreaming) {
+       const initial: Record<string, { a: string, b: string }> = {}
+       turns.forEach(t => {
+         initial[t.id] = { a: t.response_a, b: t.response_b }
+       })
+       setStreamedContent(initial)
+    }
+  }, [turns, isStreaming])
+
+  // --- The Token Simulator ---
+  const simulateStreaming = async (turnId: string, fullA: string, fullB: string) => {
+    setIsStreaming(true)
+    
+    // 1. Initialize empty state for this turn
+    setStreamedContent(prev => ({
+        ...prev,
+        [turnId]: { a: "", b: "" }
+    }))
+
+    // Split text into "tokens" (words)
+    const tokensA = fullA.split(" ")
+    const tokensB = fullB.split(" ")
+    
+    const maxLen = Math.max(tokensA.length, tokensB.length)
+    let currentA = ""
+    let currentB = ""
+
+    // 2. Loop through tokens
+    for (let i = 0; i < maxLen; i++) {
+        // Append tokens if they exist
+        if (i < tokensA.length) currentA += (i > 0 ? " " : "") + tokensA[i]
+        if (i < tokensB.length) currentB += (i > 0 ? " " : "") + tokensB[i]
+
+        // Update state
+        setStreamedContent(prev => ({
+            ...prev,
+            [turnId]: { a: currentA, b: currentB }
+        }))
+
+        // Auto scroll
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" })
+
+        // Random "network" delay (The "AI" feel)
+        await new Promise(r => setTimeout(r, Math.random() * 50 + 30))
+    }
+
+    setIsStreaming(false)
+  }
+
   // --- Mutations ---
   const createMutation = useMutation({
     mutationFn: createDuelTurn,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["duel-turns", duel.id] })
+    onSuccess: async (newTurn) => {
+      // 1. Clear inputs immediately
       setUserInput("")
       setResponseA("")
       setResponseB("")
-      toast.success("Turn saved!")
-      setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), 100)
+      
+      // 2. Add the new turn to cache immediately (Optimistic-ish)
+      queryClient.setQueryData(["duel-turns", duel.id], (old: any) => [...(old || []), newTurn])
+      
+      // 3. Trigger the simulation on the NEW turn
+      await simulateStreaming(newTurn.id, newTurn.response_a, newTurn.response_b)
+
+      toast.success("Turn saved")
     },
   })
 
@@ -72,163 +172,190 @@ export function ArenaEditor({ duel }: ArenaEditorProps) {
   }
 
   return (
-    // Reduced max-width for a cleaner, more focused reading pane
-    <div className="flex flex-col gap-6 max-w-4xl mx-auto pb-[40vh]">
+    <div className="flex flex-col min-h-screen bg-background font-sans">
       
-      {/* --- HEADER --- */}
-      <div className="flex flex-col gap-4">
-        <Link 
-          href="/dashboard" 
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors w-fit"
-        >
-          <IconArrowLeft className="mr-1 size-4" />
-          Back to Dashboard
-        </Link>
-        <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-semibold tracking-tight">{duel.name}</h1>
-                <Badge variant="outline" className="font-normal capitalize">{duel.status}</Badge>
+      {/* HEADER */}
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/80 px-6 py-3 backdrop-blur-md">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+            <IconArrowLeft className="size-5" />
+          </Link>
+          <div className="flex flex-col">
+            <h1 className="text-sm font-semibold tracking-tight">{duel.name}</h1>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                 <div className="size-2 rounded-full bg-blue-500" /> {duel.contender_a_name}
+              </span>
+              <span className="text-muted-foreground/40">vs</span>
+              <span className="flex items-center gap-1">
+                 <div className="size-2 rounded-full bg-orange-500" /> {duel.contender_b_name}
+              </span>
             </div>
-          <p className="text-sm text-muted-foreground">
-            Editor Mode • <span className="font-medium text-foreground">{duel.contender_a_name}</span> vs <span className="font-medium text-foreground">{duel.contender_b_name}</span>
-          </p>
+          </div>
         </div>
-      </div>
+        <Badge variant="secondary" className="font-mono text-[10px] uppercase tracking-wider">{duel.status}</Badge>
+      </header>
 
-      <Separator className="my-2" />
-
-      {/* --- HISTORY LIST --- */}
-      <div className="flex flex-col gap-12 py-4">
+      {/* CHAT AREA */}
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 pb-[400px]">
         {isLoading ? (
-          <div className="flex justify-center p-10"><IconLoader className="animate-spin text-muted-foreground" /></div>
+          <div className="flex justify-center py-20"><IconLoader className="animate-spin text-muted-foreground" /></div>
         ) : (
-          turns.map((turn, index) => (
-            <div key={turn.id} className="flex flex-col gap-6 group relative">
-              {/* Turn label and delete action */}
-              <div className="flex items-center justify-between mb-2">
-                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Turn {index + 1}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive h-6 w-6 transition-opacity"
-                    onClick={() => deleteMutation.mutate(turn.id)}
-                  >
-                    <IconTrash className="size-3.5" />
-                    <span className="sr-only">Delete turn</span>
-                  </Button>
-              </div>
+          <div className="flex flex-col gap-10">
+            {turns.map((turn, index) => {
+              // Get content from simulation state OR fallback to DB data
+              const contentA = streamedContent[turn.id]?.a ?? turn.response_a
+              const contentB = streamedContent[turn.id]?.b ?? turn.response_b
 
-              {/* User Bubble */}
-              <div className="flex gap-4">
-                 <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary text-primary-foreground"><IconUser className="size-4" /></AvatarFallback>
-                 </Avatar>
-                 <div className="flex-1">
-                    {/* Standardized bubble style: primary background for user */}
-                    <div className="bg-primary text-primary-foreground px-4 py-3 rounded-lg text-sm leading-relaxed whitespace-pre-wrap shadow-sm w-fit max-w-prose">
-                       {turn.user_input}
-                    </div>
-                 </div>
-              </div>
+              return (
+                <div key={turn.id} className="group flex flex-col gap-6">
+                  
+                  {/* USER BUBBLE */}
+                  <div className="flex justify-end pl-12">
+                     <div className="flex flex-col items-end gap-2 max-w-2xl">
+                        <div className="rounded-2xl rounded-tr-sm bg-primary px-5 py-3 text-primary-foreground shadow-sm">
+                          <p className="whitespace-pre-wrap text-sm leading-relaxed">{turn.user_input}</p>
+                        </div>
+                        <div className="flex items-center gap-2 pr-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Turn {index + 1}</span>
+                          <Button 
+                            variant="ghost" size="icon" 
+                            className="h-4 w-4 text-muted-foreground hover:text-destructive"
+                            onClick={() => deleteMutation.mutate(turn.id)}
+                          >
+                            <IconTrash className="size-3" />
+                          </Button>
+                        </div>
+                     </div>
+                     <Avatar className="ml-3 mt-1 h-8 w-8 border bg-background">
+                        <AvatarFallback><IconUser className="size-4 text-muted-foreground" /></AvatarFallback>
+                     </Avatar>
+                  </div>
 
-              {/* Split AI Responses */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-12">
-                 {/* Contender A - Minimalist Card with subtle indicator */}
-                 <ResponseCard 
-                   name={duel.contender_a_name} 
-                   content={turn.response_a}
-                   indicatorColor="bg-blue-500/70" // Subtle colored bar indicator
-                 />
+                  {/* AI RESPONSE ROW */}
+                  <div className="flex gap-4 pr-4 md:pr-12">
+                     <div className="flex-shrink-0 mt-1">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full border bg-background shadow-sm">
+                          <IconCpu className="size-4 text-muted-foreground" />
+                        </div>
+                     </div>
+                     
+                     <div className="flex-1 min-w-0">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+                          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-border/40 -ml-[0.5px]" />
 
-                 {/* Contender B */}
-                 <ResponseCard 
-                   name={duel.contender_b_name} 
-                   content={turn.response_b}
-                   indicatorColor="bg-orange-500/70"
-                 />
-              </div>
-            </div>
-          ))
+                          {/* Model A */}
+                          <div className="flex flex-col gap-2">
+                             <div className="flex items-center gap-2 mb-1">
+                                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                                <span className="text-xs font-medium text-muted-foreground uppercase">{duel.contender_a_name}</span>
+                             </div>
+                             <MarkdownText content={contentA} />
+                          </div>
+
+                          {/* Model B */}
+                          <div className="flex flex-col gap-2">
+                             <div className="flex items-center gap-2 mb-1">
+                                <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+                                <span className="text-xs font-medium text-muted-foreground uppercase">{duel.contender_b_name}</span>
+                             </div>
+                             <MarkdownText content={contentB} />
+                          </div>
+                        </div>
+                     </div>
+                  </div>
+
+                </div>
+              )
+            })}
+          </div>
         )}
-      </div>
+        <div ref={scrollRef} />
+      </main>
 
-      {/* --- NEW TURN EDITOR (Grounded at bottom) --- */}
-      <div className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur z-10 p-4">
-        <div className="max-w-4xl mx-auto">
-           <div className="flex flex-col gap-4">
-              
-              {/* User Input */}
-              <div className="space-y-2">
-                 <Label htmlFor="userInput" className="text-xs font-medium text-muted-foreground uppercase">User Prompt</Label>
-                 <Textarea 
-                   id="userInput"
-                   placeholder="Type next prompt..." 
-                   className="min-h-[60px] resize-y"
-                   value={userInput}
-                   onChange={(e) => setUserInput(e.target.value)}
-                 />
-              </div>
+      {/* DRAWER COMPONENT */}
+      <Drawer open={open} onOpenChange={setOpen}>
+        
+        {/* The Floating Action Button (Trigger) */}
+        <DrawerTrigger asChild>
+          <Button 
+            size="icon" 
+            className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-xl z-30 transition-transform hover:scale-105"
+          >
+            <IconPlus className="size-6" />
+          </Button>
+        </DrawerTrigger>
 
-              {/* Split Response Inputs */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div className="space-y-2">
-                    <Label htmlFor="respA" className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase">
-                        {/* Subtle color indicator next to label */}
-                        <div className="size-2 rounded-full bg-blue-500/70" />
-                        {duel.contender_a_name} Output
-                    </Label>
+        <DrawerContent>
+           <div className="mx-auto w-full max-w-5xl overflow-y-scroll">
+            <DrawerHeader>
+              <DrawerTitle className="text-center text-muted-foreground font-normal">Add New Turn</DrawerTitle>
+            </DrawerHeader>
+            
+            <div className="p-4 md:p-6 overflow-y-auto max-h-[85vh]">
+              <div className="flex flex-col gap-4">
+                
+                {/* User Input */}
+                <div className="relative">
+                  <Textarea 
+                    placeholder="Enter user prompt..." 
+                    className="min-h-[80px] max-h-[200px] resize-none rounded-xl border-muted-foreground/20 bg-muted/30 px-4 py-3 text-sm"
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                  />
+                </div>
+
+                {/* Model Inputs */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Model A */}
+                  <div className="group relative rounded-xl border border-muted-foreground/20 bg-background transition-colors focus-within:border-blue-500/50">
+                    <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
+                        <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                        <span className="text-[10px] font-medium text-muted-foreground uppercase">{duel.contender_a_name}</span>
+                    </div>
                     <Textarea 
-                      id="respA"
-                      placeholder="Paste output..."
-                      className="min-h-[120px] font-mono text-xs"
+                      placeholder="Paste Model A output..." 
+                      className="min-h-[200px] max-h-[300px] w-full resize-y border-0 bg-transparent pt-8 text-xs font-mono focus-visible:ring-0"
                       value={responseA}
                       onChange={(e) => setResponseA(e.target.value)}
                     />
-                 </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="respB" className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase">
-                        <div className="size-2 rounded-full bg-orange-500/70" />
-                        {duel.contender_b_name} Output
-                    </Label>
+                  </div>
+
+                  {/* Model B */}
+                  <div className="group relative rounded-xl border border-muted-foreground/20 bg-background transition-colors focus-within:border-orange-500/50">
+                    <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
+                        <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+                        <span className="text-[10px] font-medium text-muted-foreground uppercase">{duel.contender_b_name}</span>
+                    </div>
                     <Textarea 
-                      id="respB"
-                      placeholder="Paste output..."
-                      className="min-h-[120px] font-mono text-xs"
+                      placeholder="Paste Model B output..." 
+                      className="min-h-[200px] max-h-[300px] w-full resize-y border-0 bg-transparent pt-8 text-xs font-mono focus-visible:ring-0"
                       value={responseB}
                       onChange={(e) => setResponseB(e.target.value)}
                     />
-                 </div>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    onClick={handleSaveTurn} 
+                    disabled={createMutation.isPending} 
+                    className="rounded-full px-8 w-full md:w-auto"
+                  >
+                    {createMutation.isPending ? <IconLoader className="mr-2 size-4 animate-spin" /> : <IconPlayerPlay className="mr-2 size-4 fill-current" />}
+                    Run Turn
+                  </Button>
+                </div>
+
               </div>
-
-              <Button onClick={handleSaveTurn} disabled={createMutation.isPending} className="w-full md:w-auto md:self-end">
-                {createMutation.isPending ? <IconLoader className="mr-2 size-4 animate-spin" /> : <IconPlayerPlay className="mr-2 size-4 fill-current" />}
-                Save Turn
-              </Button>
+            </div>
+            {/* Spacer for bottom safe area on mobile */}
+            <DrawerFooter className="pt-0" />
            </div>
-        </div>
-      </div>
+        </DrawerContent>
+      </Drawer>
       
-      {/* Invisible element to scroll to, pushed up by pb */}
-      <div ref={scrollRef} className="h-10" />
     </div>
-  )
-}
-
-// Helper component for the AI response cards to keep things clean
-function ResponseCard({ name, content, indicatorColor }: { name: string, content: string, indicatorColor: string }) {
-  return (
-    <Card className="shadow-sm relative overflow-hidden border bg-card text-card-foreground">
-      {/* Thin colored indicator bar on the left */}
-      <div className={cn("absolute left-0 top-0 bottom-0 w-1", indicatorColor)} />
-      <CardHeader className="pb-2 pl-5 pt-4">
-        <div className="flex items-center gap-2 text-muted-foreground font-medium text-xs uppercase tracking-wider">
-            <IconRobot className="size-4" />
-            {name}
-        </div>
-      </CardHeader>
-      <CardContent className="pl-5 text-sm leading-relaxed whitespace-pre-wrap">
-        {content}
-      </CardContent>
-    </Card>
   )
 }

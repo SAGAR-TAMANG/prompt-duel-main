@@ -1,22 +1,14 @@
 "use client"
 import * as React from "react"
 import {
-  IconCamera,
   IconChartBar,
   IconDashboard,
   IconDatabase,
   IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
   IconHelp,
-  IconListDetails,
-  IconReport,
   IconSearch,
   IconSettings,
-  IconUsers,
 } from "@tabler/icons-react"
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -30,123 +22,62 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { SwordIcon } from "@phosphor-icons/react/dist/ssr"
+import { SidebarUser } from "@/types/common"
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
+      title: "Arena",
+      url: "/arena",
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
+      title: "Prompts",
+      url: "/prompts",
+      icon: IconFileAi,
     },
     {
-      title: "Analytics",
-      url: "#",
+      title: "Leaderboard",
+      url: "/leaderboard",
       icon: IconChartBar,
     },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
   ],
-  navClouds: [
+  projects: [
     {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      name: "Shared Links",
+      url: "/shared",
+      icon: IconSearch,
     },
     {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      name: "Input Data",
+      url: "/data",
+      icon: IconDatabase,
     },
   ],
   navSecondary: [
     {
       title: "Settings",
-      url: "#",
+      url: "/settings",
       icon: IconSettings,
     },
     {
-      title: "Get Help",
-      url: "#",
+      title: "Documentation",
+      url: "/docs",
       icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
     },
   ],
 }
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  fetchedUser: SidebarUser | null;
+}
+
+export function AppSidebar({ fetchedUser, ...props }: AppSidebarProps) {
+
+  const user = fetchedUser || {
+    name: "Guest",
+    email: "Please sign in",
+    avatar: ""
+  }
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -166,11 +97,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

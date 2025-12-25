@@ -28,3 +28,25 @@ export interface UpdateDuelInput {
   status?: "active" | "draft" | "concluded"
 }
 
+// Types of turn-based edits
+export interface DuelTurn {
+  id: string
+  duel_id: string
+  turn_order: number
+  user_input: string
+  response_a: string
+  response_b: string
+  likes_a?: number // Optional for the editor view
+  dislikes_a?: number
+  likes_b?: number
+  dislikes_b?: number
+  created_at: string
+}
+
+export interface CreateTurnInput {
+  duel_id: string
+  turn_order: number
+  user_input: string
+  response_a: string
+  response_b: string
+}

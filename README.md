@@ -1,51 +1,199 @@
-# ⚔️ PromptDuel
+<a name="readme-top"></a>
+
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
+<br />
+<div align="center">
+  <a href="https://github.com/SAGAR-TAMANG/prompt-duel-main">
+    <img src="public/logo.svg" alt="Logo" width="100" height="100">
+  </a>
+
+  <h3 align="center">PromptDuel</h3>
+
+  <p align="center">
+    The Open Source A/B Testing Arena for LLMs.
+    <br />
+    <a href="https://promptduel.feynmanpi.com"><strong>View Live Demo »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/SAGAR-TAMANG/prompt-duel-main/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/SAGAR-TAMANG/prompt-duel-main/issues">Request Feature</a>
+  </p>
+</div>
+
+## Interface
+
+<div align="center">
+  <img src="./public/ss.png" alt="App Screenshot" width="100%">
+</div>
+
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#features">Key Features</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
+
+## About The Project
 
 > **"Stop guessing which prompt is better. Duel them and let the data decide."**
 
-PromptDuel is a lightweight tool designed for AI engineers and prompt designers to evaluate LLM outputs through side-by-side "blind" testing. Instead of relying on your own bias, PromptDuel allows you to collect human-in-the-loop feedback to find the most effective prompts.
+When developing AI Agents, small semantic changes in a prompt can lead to drastically different outputs. Tracking this in spreadsheets is messy. You need a way to **blind test** these outputs against each other to get clean, unbiased data.
 
-## 🚀 The Problem
+**PromptDuel** is a lightweight tool designed for AI Engineers and Prompt Designers. It solves the "vibe check" problem by providing a structured, data-driven environment to evaluate LLM outputs side-by-side.
 
-When developing AI Agents, small changes in a prompt can lead to drastically different results. It's hard to track which iteration is actually "better" without a structured way to compare them and gather external feedback.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## ✨ Key Features
+### Built With
 
-* **Side-by-Side Comparison:** View two different prompt outputs in a clean, split-screen interface.
-* **Blind Testing:** Hide model/prompt names to get unbiased feedback from testers.
-* **Sharable Duel Links:** Generate a unique URL to send to clients or team members for voting.
-* **Persistent History:** All duels and votes are stored securely using **Supabase**.
-* **One-Click Login:** Fast, secure access via Google Auth.
+* [![Next][Next.js]][Next-url]
+* [![React][React.js]][React-url]
+* [![Tailwind][TailwindCSS]][Tailwind-url]
+* [![Supabase][Supabase]][Supabase-url]
+* **Shadcn/UI**
+* **Recharts**
+* **@dnd-kit**
 
-## 🛠️ Tech Stack
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-* **Frontend:** Next.js / React (hosted on Vercel)
-* **Backend/Database:** [Supabase](https://supabase.com)
-* **Authentication:** Supabase Google Auth
-* **Domain:** [promptduel.feynmanpi.com](https://www.google.com/search?q=https://promptduel.feynmanpi.com)
+## Getting Started
 
-## 🏗️ Getting Started
+To run this code locally and start your own duel arena, follow these steps.
 
-1. **Clone the repo:** `git clone https://github.com/yourusername/promptduel`
-2. **Install dependencies:** `npm install`
-3. **Set up Environment Variables:** Create a `.env` file with your Supabase URL and Anon Key.
-4. **Run locally:** `npm run dev`
+### Prerequisites
 
----
+* Node.js (v18+)
+* npm or pnpm
 
-## 📈 Build in Public
+### Installation
 
-This project is part of my **#BuildInPublic** journey where I focus on persistence and shipping real-world tools.
+1. **Clone the repo**
+   ```sh
+   git clone [https://github.com/SAGAR-TAMANG/prompt-duel-main.git](https://github.com/SAGAR-TAMANG/prompt-duel-main.git)
 
-Follow my progress:
+```
 
-* **X (Twitter):** [@sagar_builds](https://www.google.com/search?q=https://x.com/sagar_builds)
-* **Instagram:** [@sagar_builds](https://www.google.com/search?q=https://instagram.com/sagar_builds)
+2. **Install dependencies**
+```sh
+npm install
 
----
+```
 
-### Catchy Descriptions for Site Header/Socials:
 
-* *"Compare your prompts early, get feedback instantly."*
-* *"The 'Pepsi Challenge' for LLM Prompts."*
-* *"Unbiased feedback for your AI iterations."*
-* *"Where the best prompt wins."*
+3. **Environment Setup**
+Create a `.env.local` file in the root directory and add your Supabase credentials:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+```
+
+
+4. **Database Migration**
+Run the SQL scripts provided in `supabase/migrations` (or the SQL editor) to set up the `duels` and `votes` tables.
+5. **Run the development server**
+```sh
+npm run dev
+
+```
+
+
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Features
+
+* **⚖️ Side-by-Side Arena:** A clean, split-screen interface for comparing two text outputs (supports Markdown).
+* **🫣 Blind Testing Mode:** Model names are hidden from voters to ensure unbiased feedback.
+* **🔗 Instant Sharing:** Generate public, read-only links for clients or team members to cast votes.
+* **📊 Analytics Dashboard:** Track vote velocity and win rates visually.
+* **🔐 Secure:** Row Level Security (RLS) via Supabase ensures data integrity.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Roadmap
+
+* [x] Design & Develop the Arena UI
+* [x] Implement Drag & Drop Duel Management
+* [x] Integrate Recharts for Vote Velocity
+* [x] Supabase Integration for Real-time Voting
+* [ ] **Elo Rating System:** Calculate Elo scores for prompts across multiple duels.
+* [ ] **API Integration:** Auto-fetch outputs from OpenAI/Anthropic directly.
+* [ ] **Export Data:** Download vote results as CSV/JSON.
+
+See the [open issues](https://www.google.com/url?sa=E&source=gmail&q=https://github.com/SAGAR-TAMANG/prompt-duel-main/issues) for a full list of proposed features.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Contact
+
+Sagar Tamang - [LinkedIn](https://www.linkedin.com/in/sagar-tmg/)
+
+Project Link: [https://github.com/SAGAR-TAMANG/prompt-duel-main](https://github.com/SAGAR-TAMANG/prompt-duel-main)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Acknowledgments
+
+* [Shadcn UI](https://ui.shadcn.com)
+* [TanStack Query](https://tanstack.com/query/latest)
+* [Lucide Icons](https://lucide.dev)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/SAGAR-TAMANG/prompt-duel-main?style=for-the-badge
+[contributors-url]: https://github.com/SAGAR-TAMANG/prompt-duel-main/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/SAGAR-TAMANG/prompt-duel-main?style=for-the-badge
+[forks-url]: https://github.com/SAGAR-TAMANG/prompt-duel-main/network/members
+[stars-shield]: https://img.shields.io/github/stars/SAGAR-TAMANG/prompt-duel-main?style=for-the-badge
+[stars-url]: https://github.com/SAGAR-TAMANG/prompt-duel-main/stargazers
+[issues-shield]: https://img.shields.io/github/issues/SAGAR-TAMANG/prompt-duel-main?style=for-the-badge
+[issues-url]: https://github.com/SAGAR-TAMANG/prompt-duel-main/issues
+[license-url]: https://github.com/SAGAR-TAMANG/prompt-duel-main/blob/master/license.txt
+[license-shield]: https://img.shields.io/github/license/SAGAR-TAMANG/prompt-duel-main?style=for-the-badge
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/in/sagar-tmg/

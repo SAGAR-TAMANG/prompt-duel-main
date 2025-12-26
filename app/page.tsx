@@ -97,7 +97,7 @@ export default function Home() {
 
           <Button asChild variant="outline" size="lg" className="w-full md:w-auto px-8 gap-2">
             <a
-              href="https://github.com/your-username/promptduel"
+              href="https://github.com/SAGAR-TAMANG/prompt-duel-main"
               target="_blank"
               rel="noopener noreferrer"
             >

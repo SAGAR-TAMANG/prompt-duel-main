@@ -93,15 +93,13 @@ To run this code locally and start your own duel arena, follow these steps.
 
 1. **Clone the repo**
    ```sh
-   git clone [https://github.com/SAGAR-TAMANG/prompt-duel-main.git](https://github.com/SAGAR-TAMANG/prompt-duel-main.git)
-
-```
+   git clone https://github.com/SAGAR-TAMANG/prompt-duel-main.git
+   ```
 
 2. **Install dependencies**
-```sh
-npm install
-
-```
+  ```sh
+  npm install
+  ```
 
 
 3. **Environment Setup**

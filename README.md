@@ -145,7 +145,7 @@ npm run dev
 * [ ] **API Integration:** Auto-fetch outputs from OpenAI/Anthropic directly.
 * [ ] **Export Data:** Download vote results as CSV/JSON.
 
-See the [open issues](https://www.google.com/url?sa=E&source=gmail&q=https://github.com/SAGAR-TAMANG/prompt-duel-main/issues) for a full list of proposed features.
+See the [open issues](https://github.com/SAGAR-TAMANG/prompt-duel-main/issues) for a full list...
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -197,3 +197,11 @@ Project Link: [https://github.com/SAGAR-TAMANG/prompt-duel-main](https://github.
 [license-shield]: https://img.shields.io/github/license/SAGAR-TAMANG/prompt-duel-main?style=for-the-badge
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/sagar-tmg/
+[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
+[Next-url]: https://nextjs.org/
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+[TailwindCSS]: https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white
+[Tailwind-url]: https://tailwindcss.com/
+[Supabase]: https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white
+[Supabase-url]: https://supabase.com/

@@ -1,4 +1,5 @@
 "use client"
+
 import * as React from "react"
 import {
   closestCenter,
@@ -268,7 +269,11 @@ const columns: ColumnDef<DuelRow>[] = [
           size="icon"
           className="size-7"
           onClick={() => {
-            navigator.clipboard.writeText(row.original.public_link)
+            // Construct origin here, in the browser event
+            const origin = window.location.origin 
+            const fullLink = `${origin}${row.original.public_link}`
+
+            navigator.clipboard.writeText(fullLink)
             toast.success("Link copied to clipboard!")
           }}
         >
@@ -378,36 +383,18 @@ export function DataTable() {
     useSensor(KeyboardSensor, {})
   )
 
-  // FETCH DATA
-  const { data: fetchedData, isLoading, isError } = useGetDuels();
-  const [data, setData] = React.useState<DuelRow[]>([]);
-
-  // TRANSFORM DATA
+  // 1. Fetch the data (it arrives already transformed into DuelRow[])
+  const { data: fetchedData, isLoading, isError } = useGetDuels()
+  
+  // 2. Local state for Drag & Drop
+  const [data, setData] = React.useState<DuelRow[]>([])
+  
+  // 3. Sync Server Data to Local State
   React.useEffect(() => {
     if (fetchedData) {
-      // @ts-ignore - Assuming fetchedData matches the shape of DB response we need
-      const formattedData: DuelRow[] = fetchedData.map((duel: any) => ({
-        id: duel.id,
-        name: duel.name,
-        status: duel.status.charAt(0).toUpperCase() + duel.status.slice(1), 
-        
-        // Mocking calculated fields for now
-        total_votes: 0,
-        win_rate: {
-          winner: null,
-          percentage: 0,
-          delta: 0,
-        },
-        models: `${duel.contender_a_name} vs ${duel.contender_b_name}`,
-        created_at: duel.created_at,
-        public_link: typeof window !== 'undefined' 
-          ? `${window.location.origin}/arena/${duel.id}` 
-          : `/arena/${duel.id}`,
-      }));
-
-      setData(formattedData);
+      setData(fetchedData)
     }
-  }, [fetchedData]);
+  }, [fetchedData])
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => data?.map(({ id }) => id) || [],
